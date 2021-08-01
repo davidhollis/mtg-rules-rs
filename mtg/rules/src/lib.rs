@@ -1,20 +1,25 @@
-pub struct Corpus {
-    pub documents: Vec<Document>,
-}
+use std::collections::HashMap;
 
-impl Corpus {
-    pub fn lookup(&self, doc_name: &str, rule: &str) -> Option<&Rule> {
-        let doc = self.documents.iter().find(|d| d.name == doc_name)?;
-        doc.lookup(rule)
-    }
-}
+pub mod parser;
 
-pub struct Document {
-    pub name: String,
+pub struct Edition {
+    pub effective_date: String,
+    pub introduction: String,
     pub rules: Vec<Rule>,
+    pub glossary: HashMap<String, String>,
+    pub credits: String,
 }
 
-impl Document {
+impl Edition {
+    pub fn new() -> Edition {
+        Edition {
+            effective_date: "August 5, 1993".to_string(),
+            introduction: String::new(),
+            rules: vec![],
+            glossary: HashMap::new(),
+            credits: String::new(),
+        }
+    }
     pub fn lookup(&self, rule: &str) -> Option<&Rule> {
         Rule::find_recursive(&self.rules, rule)
     }
@@ -25,9 +30,20 @@ pub struct Rule {
     pub text: String,
     pub subrules: Vec<Rule>,
     pub examples: Vec<String>,
+    pub renumbered_from: Option<String>,
 }
 
 impl Rule {
+    pub fn new(id: String, text: String) -> Rule {
+        Rule {
+            id: id,
+            text: text,
+            subrules: vec![],
+            examples: vec![],
+            renumbered_from: None,
+        }
+    }
+
     pub fn lookup(&self, id: &str) -> Option<&Rule> {
         if self.id == id {
             Some(self)
